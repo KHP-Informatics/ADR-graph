@@ -26,7 +26,8 @@ for the Docker image below.
 Docker image
 ============
 
-A docker image is provided here.
+A docker image is provided here (https://hub.docker.com/r/dmb57
+/python-image).
 
 
 Manual - create Docker image

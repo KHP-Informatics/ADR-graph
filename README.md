@@ -1,5 +1,4 @@
 # Documentation for the EdgePrediction library
-**********************************************
 
 This repository contains a Python implementation of the knowledge graph edge prediction algorithm described in Bean et al. 2017, and the input drug knowledge graph used in that paper. The algorithm is a general binary classifier that leans a model to predict new members of a given class within the training data. 
 

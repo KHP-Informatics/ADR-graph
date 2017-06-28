@@ -34,7 +34,8 @@ with one row per edge:
 Any additional columns are ignored. Multiple files can be loaded
 sequentially into a single instance of the EdgePrediction library, in
 which case all data is combined. Example input data is available from
-an application of EdgePrediction to Adverse Drug Reactions.
+an application of EdgePrediction to Adverse Drug Reactions
+(https://github.com/KHP-Informatics/ADR-graph).
 
 Currently the algorithm assumes that edges of a given type will be
 made for one type of node, and that the same type of is the source
@@ -45,7 +46,8 @@ data will be used as features in the predictive model.
 Load data
 =========
 
-Load data from Bean et al:
+Load data from Bean et al (https://github.com/KHP-Informatics/ADR-
+graph):
 
    ep.CSV_to_graph('data.csv', header=True, srcNameCol=0, srcTypeCol=1, tgtNameCol=4, tgtTypeCol=3, edgeTypeCol=2)
 

@@ -34,3 +34,5 @@ This repository contains a Python implementation of the knowledge graph edge pre
 
 # Acknowledgements
 This work is funded by the National Institute for Health Research (NIHR) Biomedical Research Centre at South London and Maudsley NHS Foundation Trust and King’s College London.
+
+The publicly available drug data as used in Bean et al. 2017 was collected from DrugBank (www.drugbank.ca) and SIDER (http://sideeffects.embl.de).

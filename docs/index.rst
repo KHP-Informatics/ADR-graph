@@ -3,9 +3,9 @@ Documentation for the EdgePrediction library
 
 Contents:
 
-* [Introduction](docs/IntroductionDoc.rst)
+* Introduction
 
-* [Dependencies](docs/DependenciesDoc.rst)
+* Dependencies
 
   * Dependencies list
 
@@ -13,7 +13,7 @@ Contents:
 
   * Manual - create Docker image
 
-* [Usage example](docs/ExampleUseDoc.rst)
+* Usage example
 
   * Initial setup
 
@@ -25,9 +25,14 @@ Contents:
 
   * Run prediction algorithm
 
-* [EdgePrediction class documentation](docs/EdgePredictionDoc.rst)
+* EdgePrediction class documentation
 
-* [Objective class documentation](docs/ObjectiveDoc.rst)
+* Objective class documentation
 
-* [Contributing](docs/ContributingDoc.rst)
+* Contributing
 
+
+Module index
+************
+
+* Module Index

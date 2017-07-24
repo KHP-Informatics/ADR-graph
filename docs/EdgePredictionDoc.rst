@@ -80,7 +80,7 @@ class EdgePrediction.EdgePrediction(to_predict=None)
       * **can_analyse** (*bool*) – Flag used to keep track of any
         conditions that mean the network cannot be analysed
 
-      * **optimisation_method** (*str*) – Currently only “simple” is
+      * **optimisation_method** (*str*) – Currently only “graph” is
         available, which implements the method of Bean et al. 2017.
 
    CSV_to_graph(fname, header, srcNameCol, srcTypeCol, tgtNameCol, tgtTypeCol, edgeTypeCol)

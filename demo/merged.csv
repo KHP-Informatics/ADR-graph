@@ -1,0 +1,11 @@
+Source node name,Target node name,Source node type,Target node type,Relationship type
+C0019209,P2,Disease,pathway,linked_gene_in_pathway
+C0019209,P3,Disease,pathway,linked_gene_in_pathway
+C0019209,P1,Disease,pathway,linked_gene_in_pathway
+C0019209,P4,Disease,pathway,linked_gene_in_pathway
+C0036341,P2,Disease,pathway,linked_gene_in_pathway
+C0036341,P1,Disease,pathway,linked_gene_in_pathway
+C0002395,P2,Disease,pathway,linked_gene_in_pathway
+C0002395,P3,Disease,pathway,linked_gene_in_pathway
+C0002395,P1,Disease,pathway,linked_gene_in_pathway
+C0002395,P4,Disease,pathway,linked_gene_in_pathway

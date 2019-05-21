@@ -1,0 +1,9 @@
+﻿Target node name,Target node type,Type of relationship,Source node name,Source node type
+P1,pathway,in_pathway,A1BG,Gene
+P2,pathway,in_pathway,A1BG,Gene
+P1,pathway,in_pathway,A2M,Gene
+P2,pathway,in_pathway,A2M,Gene
+P3,pathway,in_pathway,A2M,Gene
+P3,pathway,in_pathway,A2M,Gene
+P4,pathway,in_pathway,A2M,Gene
+P_not_mapped,pathway,in_pathway,another_gene,Gene

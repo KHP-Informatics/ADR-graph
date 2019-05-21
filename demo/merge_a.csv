@@ -1,0 +1,6 @@
+﻿Source node type,Source node name,Type of relationship,Target node name,Target node type
+Disease,C0019209,risk_gene,A1BG,Gene
+Disease,C0036341,risk_gene,A1BG,Gene
+Disease,C0002395,risk_gene,A2M,Gene
+Disease,C0019209,risk_gene,A2M,Gene
+Disease,has_no_tgt_in_b,risk_gene,new_gene,Gene

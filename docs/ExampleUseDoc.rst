@@ -49,7 +49,7 @@ Load data
 Load data from Bean et al (https://github.com/KHP-Informatics/ADR-
 graph):
 
-   ep.CSV_to_graph('data.csv', header=True, srcNameCol=0, srcTypeCol=1, tgtNameCol=4, tgtTypeCol=3, edgeTypeCol=2)
+   ep.CSV_to_graph(fname = 'data/data.csv', header = True, srcNameCol = 0, srcTypeCol = 1, tgtNameCol = 4, tgtTypeCol = 3, edgeTypeCol = 2)
 
 
 Prepare to run prediction algorithm

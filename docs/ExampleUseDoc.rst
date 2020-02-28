@@ -7,7 +7,7 @@ Initial setup
 
 Import the library:
 
-   import EdgePrediction as ep
+   import EdgePrediction
 
 Create an instance:
 

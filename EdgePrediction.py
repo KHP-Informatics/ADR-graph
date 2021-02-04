@@ -105,7 +105,9 @@ class EdgePrediction:
 		self.correct_pval = "BH"
 		self.optimisation_method = "graph"
 
-	def CSV_to_graph(self,fname, header, srcNameCol, srcTypeCol, tgtNameCol, tgtTypeCol, edgeTypeCol):
+	def CSV_to_graph(self,fname, srcNameCol = "Source node name", 
+                  srcTypeCol = "Source node type", tgtNameCol = "Target node name", 
+                  tgtTypeCol = "Target node type", edgeTypeCol = "Relationship type"):
 		"""Parse csv file to internal graph representation
 		
 		The parsed graph is stored internally in self.graphs and is not returned. 
@@ -113,69 +115,67 @@ class EdgePrediction:
 		Parameters
 		----------
 		fname : str
-			Input file name or path
-
-		header : bool
-			Does the input file have a header row?
+			Input file name or path. Must be a csv file with a header.
 
 		srcNameCol : str
-			Column in input file containing source node names. Zero-indexed.
+			Column in input file containing source node names.
 
 		srcTypeCol : str
-			Column in input file containing source node type. Zero-indexed.
+			Column in input file containing source node type. 
 
 		tgtNameCol : str
-			Column in input file containing target node names. Zero-indexed.
+			Column in input file containing target node names. 
 
 		tgtTypeCol : str
-			Column in input file containing target node types. Zero-indexed.
+			Column in input file containing target node types. 
 
 		edgeTypeCol : str
-			Column in input file containing edge types. Zero-indexed.
+			Column in input file containing edge types.
 
 		Returns
 		-------
 		bool : bool 
 			True for success, False otherwise.
 		"""
+		
 		edge_types = {}
-
 		with open(fname, 'rU') as f:
 			reader = csv.reader(f)
-			if header:
-				next(reader, None)
-			for line in reader:
+			header = next(reader, None)
+			for line_raw in reader:
+				line = dict(zip(header, line_raw))
 				etype = line[edgeTypeCol]
 				if not etype in edge_types:
 					edge_types[etype] = set()
 				edge_types[etype].add((line[srcNameCol], line[srcTypeCol], line[tgtNameCol], line[tgtTypeCol]))
-			for etype in edge_types:
-				sourcenodes = set()
-				targetnodes = set()
-				sourcetypes = set()
-				targettypes = set()
-				edges = set()
-				for edge in edge_types[etype]:
-					if edge[0] != "" and edge[2] != "":
-						edges.add((edge[0], edge[2]))
-						sourcenodes.add(edge[0])
-						targetnodes.add(edge[2])
-						sourcetypes.add(edge[1])
-						targettypes.add(edge[3])
-				if len(sourcetypes) > 1 or len(targettypes) > 1:
-					print "ERROR: too many source or target node types"
-					return False
-				else:
-					sourcetype = list(sourcetypes)[0]
-					targettype = list(targettypes)[0]
-				g = igraph.Graph(directed = True)
-				nodes = list(sourcenodes) + list(targetnodes)
-				g.add_vertices(nodes)
-				nodeProp = [sourcetype]*len(sourcenodes) + [targettype]*len(targetnodes)
-				g.vs['type'] = nodeProp
-				g.add_edges(list(edges))
-				data = {'graph': g, 'sourcenodes': list(sourcenodes), 'sourcetype': sourcetype, 'targetnodes': list(targetnodes), 'targettype': targettype}
-				self.graphs[etype] = data
+		
+		for etype in edge_types:
+			sourcenodes = set()
+			targetnodes = set()
+			sourcetypes = set()
+			targettypes = set()
+			edges = set()
+			for edge in edge_types[etype]:
+				if edge[0] != "" and edge[2] != "":
+					edges.add((edge[0], edge[2]))
+					sourcenodes.add(edge[0])
+					targetnodes.add(edge[2])
+					sourcetypes.add(edge[1])
+					targettypes.add(edge[3])
+			if len(sourcetypes) > 1 or len(targettypes) > 1:
+				print "ERROR: too many source or target node types"
+				return False
+			else:
+				sourcetype = list(sourcetypes)[0]
+				targettype = list(targettypes)[0]
+			g = igraph.Graph(directed = True)
+			nodes = list(sourcenodes) + list(targetnodes)
+			g.add_vertices(nodes)
+			nodeProp = [sourcetype]*len(sourcenodes) + [targettype]*len(targetnodes)
+			g.vs['type'] = nodeProp
+			g.add_edges(list(edges))
+			data = {'graph': g, 'sourcenodes': list(sourcenodes), 'sourcetype': sourcetype, 'targetnodes': list(targetnodes), 'targettype': targettype}
+			self.graphs[etype] = data
 		return True
 
 	def preprocess(self):
@@ -399,23 +399,30 @@ class EdgePrediction:
 			all_pvals[network_name] = pvals
 		return all_pvals
 
-	def createWeightsGenerator(self):
+	def createWeightsGenerator(self, min_weight = None, max_weight = None, step = None):
 		"""Generate weights for parameter grid search.
 
-		Configured by the EdgePrediction object instance properties (min_weight, max_weight, step). 
+		All parameters are required. They must be set on self for some omtimisation methods (min_weight, max_weight, step). 
 
 		Parameters
 		----------
-		None. 
+		min_weight : float
+			lower bound of search space
+		max_weight : float
+			upper bound of search space, should be intended bound + step
+		step : float
+			granularity of search space
 
 		Returns
 		-------
 		weights_generator : generator
 			Instance of a generator that returns all combinations of parameters in the specified range
 		"""
-		weights_generator = itertools.product(np.arange(self.min_weight,self.max_weight,self.step), repeat = len(self.graphs))
+			
+		weights_generator = itertools.product(np.arange(min_weight, max_weight, step), repeat = len(self.graphs))
 		return weights_generator
 		
+	
 	def getKnown(self, target):
 		"""Convenience function to list all nodes with an edge to the target.
 
@@ -430,8 +437,11 @@ class EdgePrediction:
 		-------
 		list : list
 			all nodes with an edge to the target
+			returns empty list if the target is found but has no edges or is not found
 		"""
-		return list(self.graphs[self.to_predict]['TS'][target])
+		if target in self.graphs[self.to_predict]['TS']:
+			return list(self.graphs[self.to_predict]['TS'][target])
+		return []
 
 	def normalisePredictorOverlap(self, filtered):
 		"""Perform feature normalisation to range 0-1.
@@ -622,6 +632,9 @@ class EdgePrediction:
 			print "ERROR can't run prediction. self.to_predict = %s, self.can_analyse = %s" % (self.to_predict, self.can_analyse)
 			return False
 		known = self.getKnown(target)
+		if len(known) == 0:
+			print "ERROR no edges for target or target not in network: %s" % target
+			return {'error': "no edges or not in graph"}
 		known_set = set(known)
 		n_known = len(known)
 		n_other = self.n_source_nodes - n_known
@@ -641,7 +654,7 @@ class EdgePrediction:
 				return optimisation_result
 
 		if self.optimisation_method == "graph":
-			weights_generator = self.createWeightsGenerator()
+			weights_generator = self.createWeightsGenerator(self.min_weight, self.max_weight, self.step)
 			if self.network_order == None:
 				network_names = normalised.keys()
 			else:
@@ -671,6 +684,38 @@ class EdgePrediction:
 			optimisation_result['all_hits'] = list(optimisation_result['all_hits'])
 			optimisation_result['new_hits'] = list(optimisation_result['new_hits'])
 			optimisation_result['known_hits'] = list(optimisation_result['known_hits'])
+		
+		elif self.optimisation_method == "graph_sparse":
+			#first search at half the density
+			#print "coarse search"
+			weights_generator = self.createWeightsGenerator(self.min_weight, self.max_weight, self.step * 2)
+			optimisation_result = self.evaluate_weights(weights_generator, normalised, known, known_set, calculate_auc)
+			#starting from the current best, test each weight +/- fine grain step
+			start_weights = optimisation_result['weights']
+			fine_weights = []
+			
+			if self.network_order == None:
+				network_names = normalised.keys()
+			else:
+				network_names = self.network_order
+			
+			for x in network_names:
+				mid = start_weights[x]
+				out = [mid]
+				low = mid - self.step
+				high = mid + self.step
+				if low >= self.min_weight:
+					out.append(low)
+				if high <= self.max_weight:
+					out.append(high)
+				out.sort()
+				fine_weights.append(out)
+			#print fine_weights
+			weights_generator = itertools.product(*fine_weights)
+			#print "fine search"
+			optimisation_result = self.evaluate_weights(weights_generator, normalised, known, known_set, calculate_auc)
+			
+			
 		else:
 			print "No method definied to handle the optimisation method %s" % self.optimisation_method
 			raise NameError(self.optimisation_method)
@@ -684,6 +729,39 @@ class EdgePrediction:
 		for network_name in filtered:
 			optimisation_result['predictors'][network_name] = list(filtered[network_name]['predictors'])
 
+		return optimisation_result
+	
+	def evaluate_weights(self, weights_generator, normalised, known, known_set, calculate_auc):
+		if self.network_order == None:
+				network_names = normalised.keys()
+		else:
+			network_names = self.network_order
+		optimisation_result = {}
+		optimisation_result[self.objective_function] = -1 #all current objectives are in range 0-1 so the first result always replaces this
+		for weights in weights_generator:
+			weights = dict(zip(network_names, weights))
+			#print weights
+			weighted = self.weightPredictorOverlap(normalised, weights)
+			scores = self.score(weighted)
+			best_threshold_for_weights = self.findOptimumThreshold(scores, known, calculate_auc)
+			if best_threshold_for_weights[self.objective_function] > optimisation_result[self.objective_function]:
+				optimisation_result = best_threshold_for_weights
+				optimisation_result['weights'] = weights
+				optimisation_result['count_equivalent_weights'] = 1
+			elif best_threshold_for_weights[self.objective_function] == optimisation_result[self.objective_function]:
+				optimisation_result['count_equivalent_weights'] += 1 #equivalent in terms of objective function score, not necessarily predictions made
+				if self.ties == "minL2norm":
+					lnorm_best = self.L2norm(optimisation_result['weights'].values())
+					lnorm_now = self.L2norm(weights.values())
+					if lnorm_now < lnorm_best:
+						optimisation_result = best_threshold_for_weights
+						optimisation_result['weights'] = weights
+						optimisation_result['count_equivalent_weights'] = 1
+		optimisation_result['known_hits'] = known_set.intersection(optimisation_result['all_hits'])
+		optimisation_result['new_hits'] = optimisation_result['all_hits'].difference(known_set)
+		optimisation_result['all_hits'] = list(optimisation_result['all_hits'])
+		optimisation_result['new_hits'] = list(optimisation_result['new_hits'])
+		optimisation_result['known_hits'] = list(optimisation_result['known_hits'])
 		return optimisation_result
 
 	def predictAll(self, calculate_auc=False):

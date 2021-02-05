@@ -64,7 +64,7 @@ class Objective:
 		n_new_predictions = n_hits - tp
 		prec = self.precision(tp,fp,tn,fn)
 		rec = self.recall(tp,fp,tn,fn)
-		#print "tp: %s ,fp: %s ,tn: %s ,fn: %s" % (tp,fp,tn,fn)
+		#print("tp: %s ,fp: %s ,tn: %s ,fn: %s" % (tp,fp,tn,fn))
 
 		f1 =  self.f_beta(prec, rec)
 		f05 = self.f_beta(prec, rec, 0.5)

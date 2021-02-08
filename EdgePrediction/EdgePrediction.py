@@ -7,7 +7,7 @@
 import sys, csv, json, igraph, itertools
 import numpy as np
 import scipy.stats as stats #for stats.fisher_exact
-from Objective import Objective
+from .Objective import Objective
 
 #for multiple testing correction
 from rpy2.robjects.packages import importr

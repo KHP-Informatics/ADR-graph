@@ -10,9 +10,6 @@ This repository contains a Python implementation of the knowledge graph edge pre
 
   * Dependencies list
 
-  * Docker image
-
-  * Manual - create Docker image
 
 * [Usage example](docs/ExampleUseDoc.rst)
 

@@ -1,0 +1,5 @@
+Objective class documentation
+=============================
+
+.. automodule:: EdgePrediction.Objective
+   :members:

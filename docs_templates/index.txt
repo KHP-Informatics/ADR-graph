@@ -1,0 +1,22 @@
+Documentation for the EdgePrediction library
+============================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   IntroductionDoc
+   DependenciesDoc
+   ExampleUseDoc
+   EdgePredictionDoc
+   ObjectiveDoc
+   UtilsDoc
+   ContributingDoc
+
+
+Module index
+==================
+
+* :ref:`modindex`
+
+

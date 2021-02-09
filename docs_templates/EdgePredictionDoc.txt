@@ -1,0 +1,5 @@
+EdgePrediction class documentation
+==================================	
+
+.. automodule:: EdgePrediction.EdgePrediction
+   :members:

@@ -6,3 +6,4 @@ Makefile
 build
 dist
 *.egg-info
+*/doctrees/

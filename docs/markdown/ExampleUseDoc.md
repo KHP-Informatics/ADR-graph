@@ -2,6 +2,12 @@
 
 ## Initial setup
 
+Install the library:
+
+```
+pip install edgeprediction
+```
+
 Import the library:
 
 ```

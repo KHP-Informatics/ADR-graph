@@ -4,14 +4,14 @@ This repository contains a Python implementation of the knowledge graph edge pre
 
 # Contents:
 
-* [Introduction](docs/IntroductionDoc.rst)
+* [Introduction](docs/markdown/IntroductionDoc.rst)
 
-* [Dependencies](docs/DependenciesDoc.rst)
+* [Dependencies](docs/markdown/DependenciesDoc.rst)
 
   * Dependencies list
 
 
-* [Usage example](docs/ExampleUseDoc.rst)
+* [Usage example](docs/markdown/ExampleUseDoc.rst)
 
   * Initial setup
 
@@ -23,11 +23,13 @@ This repository contains a Python implementation of the knowledge graph edge pre
 
   * Run prediction algorithm
 
-* [EdgePrediction class documentation](docs/EdgePredictionDoc.rst)
+* [EdgePrediction class documentation](docs/markdown/EdgePredictionDoc.rst)
 
-* [Objective class documentation](docs/ObjectiveDoc.rst)
+* [Objective class documentation](docs/markdown/ObjectiveDoc.rst)
 
-* [Contributing](docs/ContributingDoc.rst)
+* [Utils class documentation](docs/markdown/UtilsDoc.rst)
+
+* [Contributing](docs/markdown/ContributingDoc.rst)
 
 # Acknowledgements
 This work is funded by the National Institute for Health Research (NIHR) Biomedical Research Centre at South London and Maudsley NHS Foundation Trust and King’s College London.

@@ -1,11 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Thu May 23 10:32:13 2019
-
-@author: danielbean
-"""
-
 ## run risk prediction cross validation on multiple cores in parallel
 ## thanks https://sebastianraschka.com/Articles/2014_multiprocessing.html
 import multiprocessing as mp

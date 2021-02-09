@@ -1,11 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jun  5 17:54:18 2019
-
-@author: danielbean
-"""
-
 # =============================================================================
 # Example utility script around the EdgePrediction library
 # makes a basic CLI for testing

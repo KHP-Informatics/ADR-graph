@@ -1,10 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May 24 11:37:11 2019
-
-@author: danielbean
-"""
 # =============================================================================
 # Example script run cross validation for all targets in the database
 # =============================================================================

@@ -1,1 +1,1 @@
-from EdgePrediction import EdgePrediction
+from .EdgePrediction import EdgePrediction

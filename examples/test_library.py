@@ -9,7 +9,7 @@ import EdgePrediction, json
 ep = EdgePrediction.EdgePrediction()
 
 #load data from edge list
-ep.CSV_to_graph(fname = 'data/data.csv')
+ep.CSV_to_graph(fname = '../data/data.csv')
 
 #filter the source nodes in all graphs so that all the source nodes are common to all input graphs
 #keep those nodes and all their edges

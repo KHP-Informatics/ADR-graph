@@ -8,6 +8,7 @@ import sys, csv, json, igraph, itertools
 import numpy as np
 import scipy.stats as stats #for stats.fisher_exact
 from .Objective import Objective
+from .errors import InputError
 
 #for multiple testing correction
 from rpy2.robjects.packages import importr
@@ -107,7 +108,7 @@ class EdgePrediction:
 
 	def CSV_to_graph(self,fname, srcNameCol = "Source node name", 
                   srcTypeCol = "Source node type", tgtNameCol = "Target node name", 
-                  tgtTypeCol = "Target node type", edgeTypeCol = "Relationship type"):
+                  tgtTypeCol = "Target node type", edgeTypeCol = "Relationship type", encoding='utf-8'):
 		"""Parse csv file to internal graph representation
 		
 		The parsed graph is stored internally in self.graphs and is not returned. 
@@ -131,6 +132,9 @@ class EdgePrediction:
 
 		edgeTypeCol : str
 			Column in input file containing edge types.
+		
+		encoding : str
+			encoding type for input file e.g. utf-8, utf-8-sig
 
 		Returns
 		-------
@@ -139,7 +143,7 @@ class EdgePrediction:
 		"""
 		
 		edge_types = {}
-		with open(fname, 'rU') as f:
+		with open(fname, 'rU', encoding=encoding) as f:
 			reader = csv.reader(f)
 			header = next(reader, None)
 			for line_raw in reader:
@@ -162,9 +166,10 @@ class EdgePrediction:
 					targetnodes.add(edge[2])
 					sourcetypes.add(edge[1])
 					targettypes.add(edge[3])
-			if len(sourcetypes) > 1 or len(targettypes) > 1:
-				print("ERROR: too many source or target node types")
-				return False
+			if len(sourcetypes) > 1:
+				raise InputError("too many source node types in input data")
+			elif len(targettypes) > 1:
+				raise InputError("too many target node types in input data")
 			else:
 				sourcetype = list(sourcetypes)[0]
 				targettype = list(targettypes)[0]
@@ -220,7 +225,7 @@ class EdgePrediction:
 				common_source_nodes = common_source_nodes.intersection(set(self.graphs[nw]['sourcenodes']))
 		if len(common_source_nodes) == 0:
 			self.can_analyse = False
-			print("ERROR no source nodes are common to all input graphs. Cannot continue")
+			raise InputError("Input graph cannot be analysed, no source nodes are common to all input graphs")
 			return False
 		
 		print("%s source nodes are common to all %s input graphs" % (len(common_source_nodes), len(graph_names)))
@@ -347,7 +352,7 @@ class EdgePrediction:
 					predictors[rownames == ignore] = False
 					print("ignoring %s as a predictor in network %s" % (ignore, network_name))
 				else:
-					print("ERROR %s not found in row names for network %s, continuing" % (ignore, network_name))
+					print("WARNING %s not found in row names for network %s, continuing" % (ignore, network_name))
 			predictors = set(rownames[predictors])
 			colnames = list(self.graphs[network_name]['ST'].keys())
 			overlaps = [len(predictors.intersection(self.graphs[network_name]['ST'][x])) for x in colnames]
@@ -642,13 +647,15 @@ class EdgePrediction:
 			'threshold' : threshold of trained model
 			'scores' : if called with return_scores=True, a dict with score and breakdown for every node (output of self.getScores with optimised weights)
 		"""
-		if self.to_predict == None or self.can_analyse == False:
-			print("ERROR can't run prediction. self.to_predict = %s, self.can_analyse = %s" % (self.to_predict, self.can_analyse))
-			return False
+		if self.to_predict == None:
+			raise InputError("Cannot run prediction, no target set for EdgePrediction.to_predict")
+		if self.can_analyse == False:
+			raise InputError("Cannot run prediction, input graph cannot be analysed.")
 		known = self.getKnown(target)
 		if len(known) == 0:
-			print("ERROR no edges for target or target not in network: %s" % target)
-			return {'error': "no edges or not in graph"}
+			msg = "Cannot run prediction: no edges for target or target not in network: {}".format(target)
+			raise InputError(msg)
+			# return {'error': "no edges or not in graph"}
 		known_set = set(known)
 		n_known = len(known)
 		n_other = self.n_source_nodes - n_known
@@ -798,9 +805,10 @@ class EdgePrediction:
 		all_results : dict
 			Keys are model target node names, values are the output of self.predict()
 		"""
-		if self.to_predict == None or self.can_analyse == False:
-			print("ERROR can't run prediction. self.to_predict = %s, self.can_analyse = %s" % (self.to_predict, self.can_analyse))
-			return False
+		if self.to_predict == None:
+			raise InputError("Cannot run prediction, no target set for EdgePrediction.to_predict")
+		if self.can_analyse == False:
+			raise InputError("Cannot run prediction, input graph cannot be analysed.")
 		all_results = {}
 		all_targets = list(self.graphs[self.to_predict]['TS'].keys())
 		n_targets = len(all_targets)
@@ -831,9 +839,10 @@ class EdgePrediction:
 			Keys are names of known source nodes in the graph. Values are the objective function performance and 
 			whether the deleted edge was predicted.
 		"""
-		if self.to_predict == None or self.can_analyse == False:
-			print("ERROR can't run prediction. self.to_predict = %s, self.can_analyse = %s" % (self.to_predict, self.can_analyse))
-			return False
+		if self.to_predict == None:
+			raise InputError("Cannot run prediction, no target set for EdgePrediction.to_predict")
+		if self.can_analyse == False:
+			raise InputError("Cannot run prediction, input graph cannot be analysed.")
 		known = self.getKnown(target)
 		target_node_id = self.graphs[self.to_predict]['graph'].vs.select(name_eq=target)
 		loo_results = {}
@@ -896,7 +905,9 @@ class EdgePrediction:
 		remainder = len(known) % k
 
 		if edges_per_fold == 0:
-			print("specified fold size %s is too large for %s with %s known sources" % (k, target, len(known)))
+			msg = "specified fold size %s is too large for %s with %s known sources" .format(k, target, len(known))
+			if self.to_predict == None:
+				raise InputError(msg)
 			return False
 
 		start = 0
@@ -1009,8 +1020,10 @@ class EdgePrediction:
 			breakdown - if breakdown is true, keys are node names, values are dicts of {network name : contribution}, otherwise an empty dict.
 		"""
 		if self.to_predict == None or self.can_analyse == False:
-			print("ERROR can't run prediction. self.to_predict = %s, self.can_analyse = %s" % (self.to_predict, self.can_analyse))
-			return False
+			if self.to_predict == None:
+				raise InputError("Cannot run prediction, no target set for EdgePrediction.to_predict")
+			if self.can_analyse == False:
+				raise InputError("Cannot run prediction, input graph cannot be analysed.")
 		known = self.getKnown(target)
 		n_known = len(known)
 		n_other = self.n_source_nodes - n_known

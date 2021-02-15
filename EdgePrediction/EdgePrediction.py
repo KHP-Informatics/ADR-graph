@@ -498,7 +498,7 @@ class EdgePrediction:
 				weighted[network_name][node_name] = overlaps[network_name][node_name] * weights[network_name]
 		return weighted
 
-	def score(self, overlaps):
+	def score(self, overlaps, breakdown=False):
 		"""Calculate the final score for each source node from weighted features.
 
 		Parameters
@@ -506,19 +506,29 @@ class EdgePrediction:
 		overlaps : dict 
 			output from self.weightPredictorOverlap, normalised and weighted features for each source node
 
+		breakdown : bool 
+			if True, also return the breakdown of score contribution by network for each node
+
 		Returns
 		-------
-		scores : dict
-			Keys are edge types, values are dicts keyed by source node name and values are scores.
+		result : dict
+			scores - Keys are edge types, values are dicts keyed by source node name and values are scores.
+			breakdown - if breakdown=True, a dict of {node: {normalised contribution of each network type to score}}, otherwise an empty dict. 
 		"""
 		networks = list(overlaps.keys())
 		nodes = overlaps[networks[0]].keys()
 		scores = {}
+		brkd = {}
 		for n in nodes:
 			scores[n] = 0
+			per_nw = {}
 			for nw in networks:
 				scores[n] += overlaps[nw][n]
-		return scores
+				per_nw[nw] = overlaps[nw][n] #cache in case breakdown needed
+			if breakdown:
+				brkd[n] = {nw: per_nw[nw]/scores[n] for nw in networks}
+		result = {'scores': scores, 'breakdown': brkd}
+		return result
 
 	def findOptimumThreshold(self, score, known, calculate_auc = False):
 		"""Set the prediction threshold according to the objective function
@@ -603,7 +613,7 @@ class EdgePrediction:
 		"""
 		return sum([x**2 for x in weights])
 
-	def predict(self, target, calculate_auc = False):
+	def predict(self, target, calculate_auc = False, return_scores=False):
 		"""Train a predictive model for a given target.
 
 		Optimum parameters are found using a grid search.
@@ -615,6 +625,9 @@ class EdgePrediction:
 
 		calculate_auc: bool
 			If True, the AUC is calculated and included in the output. Default False.
+
+		return_scores: bool
+			If True, also returns the score and normalised contribution of each edge type to the total score for each node
 		
 		Returns
 		-------
@@ -627,6 +640,7 @@ class EdgePrediction:
 			'known_hits' : all hits from the model that are known in the input graph
 			'weights' : dict of parameters in the trained model, keys are edge types
 			'threshold' : threshold of trained model
+			'scores' : if called with return_scores=True, a dict with score and breakdown for every node (output of self.getScores with optimised weights)
 		"""
 		if self.to_predict == None or self.can_analyse == False:
 			print("ERROR can't run prediction. self.to_predict = %s, self.can_analyse = %s" % (self.to_predict, self.can_analyse))
@@ -664,7 +678,7 @@ class EdgePrediction:
 			for weights in weights_generator:
 				weights = dict(zip(network_names, weights))
 				weighted = self.weightPredictorOverlap(normalised, weights)
-				scores = self.score(weighted)
+				scores = self.score(weighted)['scores']
 				best_threshold_for_weights = self.findOptimumThreshold(scores, known, calculate_auc)
 				if best_threshold_for_weights[self.objective_function] > optimisation_result[self.objective_function]:
 					optimisation_result = best_threshold_for_weights
@@ -728,6 +742,8 @@ class EdgePrediction:
 		optimisation_result['predictors'] = {}
 		for network_name in filtered:
 			optimisation_result['predictors'][network_name] = list(filtered[network_name]['predictors'])
+		if return_scores:
+			optimisation_result['scores'] = self.getScores(target, optimisation_result['weights'], breakdown=True)
 
 		return optimisation_result
 	
@@ -742,7 +758,7 @@ class EdgePrediction:
 			weights = dict(zip(network_names, weights))
 			#print(weights)
 			weighted = self.weightPredictorOverlap(normalised, weights)
-			scores = self.score(weighted)
+			scores = self.score(weighted)['scores']
 			best_threshold_for_weights = self.findOptimumThreshold(scores, known, calculate_auc)
 			if best_threshold_for_weights[self.objective_function] > optimisation_result[self.objective_function]:
 				optimisation_result = best_threshold_for_weights
@@ -968,7 +984,7 @@ class EdgePrediction:
 			area = area.dtype.type(area)
 		return area
 
-	def getScores(self,target,weights):
+	def getScores(self,target,weights, breakdown = False):
 		"""Calculate the score for all source nodes for a given set of weights.
 
 		Not used internally, but a convenient way to calculate the score distribution for an arbitrary set of weights
@@ -982,11 +998,15 @@ class EdgePrediction:
 
 		weights : dict
 			Keys are edge types, values are weights
+		
+		breakdown : bool
+			If true, return a breakdown of the normalised contribution to the score of each node by network name
 
 		Returns
 		-------
 		scores : dict
-			Keys are edge types, values are dicts keyed by source node name and values are scores.
+			scores - Keys are edge types, values are dicts keyed by source node name and values are scores.
+			breakdown - if breakdown is true, keys are node names, values are dicts of {network name : contribution}, otherwise an empty dict.
 		"""
 		if self.to_predict == None or self.can_analyse == False:
 			print("ERROR can't run prediction. self.to_predict = %s, self.can_analyse = %s" % (self.to_predict, self.can_analyse))
@@ -1010,5 +1030,5 @@ class EdgePrediction:
 				return optimisation_result
 
 		weighted = self.weightPredictorOverlap(normalised, weights)
-		scores = self.score(weighted)
+		scores = self.score(weighted, breakdown)
 		return scores

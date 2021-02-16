@@ -44,8 +44,13 @@ This work is funded by the National Institute for Health Research (NIHR) Biomedi
 
 The publicly available drug data as used in Bean et al. 2017 was collected from DrugBank (www.drugbank.ca) and SIDER (http://sideeffects.embl.de).
 
-# Documentation
+# Documentation and testing
 Documentation is built with sphinx from docs_templates with sphinx>=v3.4.3
 ```
 sphinx-build -M markdown ./ ../docs
+```
+
+Testing with pytest
+```
+python -m pytest tests
 ```

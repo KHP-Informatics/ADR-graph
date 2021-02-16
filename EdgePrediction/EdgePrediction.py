@@ -143,7 +143,7 @@ class EdgePrediction:
 		"""
 		
 		edge_types = {}
-		with open(fname, 'rU', encoding=encoding) as f:
+		with open(fname, 'r', encoding=encoding) as f:
 			reader = csv.reader(f)
 			header = next(reader, None)
 			for line_raw in reader:

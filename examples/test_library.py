@@ -23,9 +23,20 @@ ep.to_predict = 'HAS_SIDE_EFFECT'
 #ties may make different predictions
 ep.network_order = ['HAS_SIDE_EFFECT', 'DRUG_TARGETS', 'INDICATED_FOR']
 
-#train the model
+#train the model and return score breakdown
 target_name = "C0027849"
-result = ep.predict(target = target_name, calculate_auc = True)
+result = ep.predict(target = target_name, calculate_auc = True, return_scores=True)
+print("score breakdown for DB01224")
+print(result['scores']['scores']['DB01224'])
+print(result['scores']['breakdown']['DB01224'])
+
+#metrics reported automatically
+available = ['F1', 'F05', 'F2', 'ACC', 'J', 'PREC', 'REC', 'FDR', 'FPR']
+for metric in available:
+    print("{} = {:.3f}".format(metric, result[metric]))
+
+#the contingency matrix is available automatically
+print(result['contingency'])
 
 #predicted (unknown) causes of the target ADR
 new_predictions = result['new_hits']

@@ -106,7 +106,7 @@ def xv_chunk(start, stop, parallel = True, target_list = None, output=None, ep_c
 
           out_fname = 'xv_%s_chunk_%s_%s.txt' % (out_fname, start, stop)
           with open(out_fname,'w') as f:
-               json.dump(output, f)
+               json.dump(output, f, cls=NumpyEncoder)
 
      else:
           return xv_results

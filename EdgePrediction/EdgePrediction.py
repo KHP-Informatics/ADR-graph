@@ -9,6 +9,8 @@ import numpy as np
 import scipy.stats as stats #for stats.fisher_exact
 from .Objective import Objective
 from .errors import InputError
+from scipy import optimize
+from io import open #for py2 compatibility
 
 #for multiple testing correction
 from rpy2.robjects.packages import importr
@@ -901,7 +903,7 @@ class EdgePrediction:
 			np.random.shuffle(known)
 
 		#number of edges to delete per fold
-		edges_per_fold = len(known)/k
+		edges_per_fold = int(len(known)/k)
 		remainder = len(known) % k
 
 		if edges_per_fold == 0:
@@ -1045,3 +1047,45 @@ class EdgePrediction:
 		weighted = self.weightPredictorOverlap(normalised, weights)
 		scores = self.score(weighted, breakdown)
 		return scores
+
+	def min_func(self, params, normalised, known, obj_method, network_names):
+		#in development, do not use this
+		threshold = params[0]
+		weights_list = params[1:]
+
+		weights = dict(zip(network_names, weights_list))
+		weighted = self.weightPredictorOverlap(normalised, weights)
+		scores = self.score(weighted)['scores']
+
+		node_names = list(scores.keys())
+		score = np.array([scores[x] for x in scores])
+		known = np.in1d(node_names, known, assume_unique=True)
+
+		obj = Objective(score, known)
+		result = obj.evaluate(threshold)
+		#print("step done with score", result[obj_method])
+		return 1.0 - result[obj_method]
+	
+	def new_opt(self, target, method='nelder-mead', init_method='mid'):
+		#in development, do not use this
+		known = self.getKnown(target)
+		known_set = set(known)
+		n_known = len(known)
+		n_other = self.n_source_nodes - n_known
+		grouped = self.groupSparseAdjacency(target)
+		enrichment_pvals = self.enrichment(grouped, n_known, n_other)
+		filtered = self.filterSparseAdjacency(enrichment_pvals, target)
+		normalised, overlap_max = self.normalisePredictorOverlap(filtered)
+		if self.network_order == None:
+				network_names = list(normalised.keys())
+		else:
+			network_names = self.network_order
+
+		n_params = len(network_names)+1
+		if init_method == 'mid':
+			x0 = [0.5] * n_params
+		if init_method == 'random':
+			x0 = [np.random.rand() for x in range(n_params)]
+
+		op = optimize.minimize(self.min_func, x0, args=(normalised, known, self.objective_function, network_names), method=method)
+		return op
